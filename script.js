@@ -1,14 +1,10 @@
-/*
-verticality
-arrow keys
-boundry
-
-*/
 var spaceship;
 var astroids = [];
 var score;
 const lvl1 = 50;
-const baseSpeed = .0001
+const lvl = 1;
+const baseSpeed = 2
+const startbutton = document.querySelector("button");
 document.addEventListener('keydown', (event) => {
   if (event.key == 'd') {
     spaceship.angle += 100 * Math.PI / 180;
@@ -28,19 +24,23 @@ document.addEventListener('keydown', (event) => {
     acceleratey(-5 * baseSpeed)
   else if (event.key == 'S')
     acceleratey(5 * baseSpeed)
-  else if(event.key.toLowerCase()=='e'){
+  else if (event.key.toLowerCase() == 'e') {
     hyperaccelerate(-0.5)
   }
-  else if(event.key.toLowerCase()=='q'){
+  else if (event.key.toLowerCase() == 'q') {
     hyperaccelerate(2)
   }
 }, false);
 function startGame() {
-  spaceship = new component(30, 50, "spaceship.png", 240, 480, "image");
+  document.getElementById("gameOver").innerHTML = `<button onmousedown="hyperaccelerate(-0.000000001)" id="accelerateButton">BRAKE</button>
+    <p>Use the ACCELERATE button to speed up</p>
+    <p>Use the BRAKE button to slow down</p>
+    <p>How long can you stay alive?</p>`
+  spaceship = new component(20, 25, "airship(3).png", 240, 480, "image");
+  //spaceship.style.border-style = 'solid';
   spaceship.accel = 0.00;
   score = new component("30px", "Consolas", "black", 10, 240, "text");
   space.start();
-  //myGameArea.start();
 }
 
 var space = {
@@ -58,13 +58,12 @@ var space = {
   },
   stop: function() {
     clearInterval(this.interval);
-    this.clear();
-    document.getElementById("gameOver").innerHTML = "GAME OVER!";
     //alert("GAME OVER! RESTART?");
-    //restart();
+    //restart();x
   },
   speedUp: function() {
-    this.interval = setInterval(updateSpace, lvl1)
+    lvl++;
+    this.interval = setInterval(updateSpace, lvl1 * lvl);
   }
 }
 
@@ -98,10 +97,8 @@ function component(width, height, color, x, y, type) {
         this.x,
         this.y,
         this.width, this.height);
-    }
-    else {
-      ctx.fillStyle = color;
-      ctx.fillRect(this.x, this.y, this.width, this.height);
+      //ctx.fillStyle = "red";
+      //ctx.fillRect(this.x, this.y, this.width, this.height);
     }
     ctx.save();
     ctx.translate(this.x, this.y);
@@ -109,16 +106,23 @@ function component(width, height, color, x, y, type) {
     ctx.restore();
   }
   this.newPos = function() {
-    this.accelSpeedx += 0.2 * this.accelx;
-    this.accelSpeedy += 0.2 * this.accely;
-    this.speedX += 0.4 * this.accelSpeedx;
+    /*this.accelSpeedx += this.accelx;
+    this.accelSpeedy += this.accely;
+    if (Math.abs(this.accelSpeedx) > 1 && this.accelSpeedx / this.accelx > 0)
+      this.speedX += 0.05 * this.accelSpeedx;
+    else
+      this.speedX += 0.5 * this.accelSpeedx;
     this.speedY += 0.4 * this.accelSpeedy;
-    this.x += 0.8 * this.speedX;
-    this.y += 0.8 * this.speedY;
-    this.hitBottom();
+    if (Math.abs(this.accelSpeedx) > 1 && this.x / this.accelSpeedx > 0)
+      this.x += 0.0025 * this.speedX;
+    else*/
+    this.x += this.accelx//0.25 * this.speedX;
+    this.y += this.accely//0.8 * this.speedY;
     console.log(this.accelx);
     console.log(this.accelSpeedx);
     console.log(this.speedX);
+    console.log(this.x);
+    this.hitBottom();
   }
   this.hitBottom = function() {
     var rockbottom = space.canvas.height - this.height;
@@ -153,21 +157,12 @@ function component(width, height, color, x, y, type) {
     var othertop = otherobj.y;
     var otherbottom = otherobj.y + (otherobj.height);
     var crash = true;
-    if (otherobj.type == "circle"){
-      var distX = Math.abs(otherobj.x - this.x-this.width/2);
-      var distY = Math.abs(otherobj.y - this.y-this.height/2);
-      if (distX > (this.width/2 + otherobj.r)) {
-        return false; 
-      }
-      if (distY > (this.height/2 + otherobj.r)) {
-        return false; 
-      }
-      if (distX <= (this.width/2)) {
-        return true; 
-      } 
-      var dx=distX-this.width/2;
-      var dy=distY-this.height/2;
-      return (dx*dx+dy*dy<=(otherobj.radius*otherobj.radius));
+    if (otherobj.type == "circle") {
+      var distX = Math.abs(otherobj.x - this.x - this.width / 2);
+      var distY = Math.abs(otherobj.y - this.y - this.height / 2);
+      var dx = distX - this.width / 2;
+      var dy = distY - this.height / 2;
+      return (dx * dx + dy * dy <= (otherobj.radius * otherobj.radius));
     } else if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
       crash = false;
     }
@@ -195,21 +190,29 @@ function componentCircle(radius, color, x, y) {
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
     ctx.lineWidth = 3;
     ctx.strokeStyle = 'blue';
+    ctx.drawImage(this.image, this.x, this.y, 4 * radius, 2 * radius);
     ctx.stroke();
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.restore();
   }
   this.newPos = function() {
-    this.accelSpeedx += 0.2 * this.accelx;
-    this.accelSpeedy += 0.2 * this.accely;
-    this.speedX += 0.4 * this.accelSpeedx;
+    /*this.accelSpeedx += .2*this.accelx;
+    this.accelSpeedy += .2*this.accely;
+    if(Math.abs(this.accelSpeedx)>1 && this.accelSpeedx/this.accelx>0)
+      this.speedX += 0.04 * this.accelSpeedx;
+    else
+      this.speedX += 2 * this.accelSpeedx;
     this.speedY += 0.4 * this.accelSpeedy;
-    this.x += 0.8 * this.speedX;
-    this.y += 0.8 * this.speedY;
+    if(Math.abs(this.accelSpeedx)>1 && this.x/this.accelSpeedx>0)
+      this.x += 0.08 * this.speedX;
+    else*/
+    this.x += accelx//16 * this.speedX;
+    this.y += accely//0.8 * this.speedY;
     console.log(this.accelx);
     console.log(this.accelSpeedx);
     console.log(this.speedX);
+    console.log(this.x);
   }
 }
 
@@ -218,7 +221,7 @@ function updateSpace() {
   var y, width, gap, minWidth, maxWidth, minGap, maxGap;
   for (i = 0; i < astroids.length; i += 1) {
     if (spaceship.crashWith(astroids[i])) {
-      space.stop();
+      stop();
       return;
     }
   }
@@ -243,13 +246,13 @@ function updateSpace() {
     var choice = Math.floor(Math.random() * 2);
     if (choice > 0) {
       width = Math.floor(Math.random() * (maxWidth - minWidth + 1) + minWidth);
-      astroids.push(new componentCircle(width / 1.5, "fallingMeteor.png", Math.floor(Math.random() * 20) + 200 + randomInt, -(y + 20)));
+      astroids.push(new componentCircle(width / 1.5, "meatball(1).png", Math.floor(Math.random() * 20) + 200 + randomInt, -(y + 20)));
       width = Math.floor(Math.random() * (maxWidth - minWidth + 1) + minWidth);
-      astroids.push(new componentCircle(width / 1.5, "fallingMeteor.png", 480 - width - randomInt, -y));
+      astroids.push(new componentCircle(width / 1.5, "meatball(1).png", 480 - width - randomInt, -y));
     }
     else {
       width = Math.floor(Math.random() * (maxWidth - minWidth + 2) + minWidth + 1);
-      astroids.push(new componentCircle(width / 1.4, "fallingMeteor.png", Math.floor(Math.random() * 10) + 25 + randomInt, -y));
+      astroids.push(new componentCircle(width / 1.4, "meatball(1).png", Math.floor(Math.random() * 10) + 25 + randomInt, -y));
     }
   }
   for (i = 0; i < astroids.length; i += 1) {
@@ -260,7 +263,7 @@ function updateSpace() {
   score.update();
   spaceship.newPos();
   spaceship.update();
-  if (space.framNo % 1000) {
+  if (space.framNo % 100 == 0) {
     space.speedup();
   }
 }
@@ -271,61 +274,23 @@ function everyinterval(n) {
 }
 
 function accelerate(n) {
-  spaceship.accelx = Math.log(n + 1);
+  spaceship.accelx = n;
 }
 function acceleratey(n) {
-  spaceship.accely = Math.log(n + 1);
+  spaceship.accely = n;
 }
 function hyperaccelerate(n) {
   spaceship.accelx *= n;
   spaceship.accely *= n;
 }
-/*var myGameArea = {
-    canvas : document.createElement("canvas"),
-    start : function() {
-        this.canvas.width = 480;
-        this.canvas.height = 270;
-        this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, 20);
-        window.addEventListener('keydown', function (e) {
-            e.preventDefault();
-            myGameArea.keys = (myGameArea.keys || []);
-            myGameArea.keys[e.keyCode] = (e.type == "keydown");
-        })
-        window.addEventListener('keyup', function (e) {
-            myGameArea.keys[e.keyCode] = (e.type == "keydown");
-        })
-    },
-    stop : function() {
-        clearInterval(this.interval);
-    },    
-    clear : function() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-}
-
-function updateGameArea() {
-    myGameArea.clear();
-    myGamePiece.moveAngle = 0;
-    myGamePiece.speed = 0;
-    if (myGameArea.keys && myGameArea.keys[37]) {myGamePiece.moveAngle = -1; }
-    if (myGameArea.keys && myGameArea.keys[39]) {myGamePiece.moveAngle = 1; }
-    if (myGameArea.keys && myGameArea.keys[38]) {myGamePiece.speed= 1; }
-    if (myGameArea.keys && myGameArea.keys[40]) {myGamePiece.speed= -1; }
-    myGamePiece.newPos();
-    myGamePiece.update();
-}*/
 function stop() {
-  space.stop();
+  //spaceship.remove();
   while (astroids.length > 0) {
     astroids.pop();
   }
-  spaceship.remove();
-  clearInterval(space.interval);
-  space.clear();
-  score.text="SCORE: " + space.frameNo;
+  space.stop();
+  document.getElementById("gameOver").innerHTML = "GAME OVER!";
+  score.text = "SCORE: " + space.frameNo;
   score.update();
   return;
 }
@@ -335,8 +300,7 @@ function restart() {
   }
   space.clear();
   clearInterval(space.interval);
-  document.getElementById("gameOver").innerHTML = `<button onmousedown="hyperaccelerate(1.5)" id="accelerateButton">ACCELERATE</button>
-    <button onmousedown="hyperaccelerate(-0.000000001)" id="accelerateButton">BRAKE</button>
+  document.getElementById("gameOver").innerHTML = `<button onmousedown="hyperaccelerate(-0.000000001)" id="accelerateButton">BRAKE</button>
     <p>Use the ACCELERATE button to speed up</p>
     <p>Use the BRAKE button to slow down</p>
     <p>How long can you stay alive?</p>`
