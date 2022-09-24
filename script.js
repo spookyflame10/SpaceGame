@@ -1,10 +1,15 @@
 var spaceship;
-var astroids = [];
+var asteroids = [];
 var score;
-const lvl1 = 50;
-const lvl = 1;
+var lvl1;
+var lvl;
 const baseSpeed = 2
 const startbutton = document.querySelector("button");
+var background;
+var backSound;
+var explodeSound;
+var startSound;
+var pauseSound;
 document.addEventListener('keydown', (event) => {
   if (event.key == 'd') {
     spaceship.angle += 100 * Math.PI / 180;
@@ -32,24 +37,51 @@ document.addEventListener('keydown', (event) => {
   }
 }, false);
 function startGame() {
-  document.getElementById("gameOver").innerHTML = `<button onmousedown="hyperaccelerate(-0.000000001)" id="accelerateButton">BRAKE</button>
-    <p>Use the ACCELERATE button to speed up</p>
-    <p>Use the BRAKE button to slow down</p>
-    <p>How long can you stay alive?</p>`
-  spaceship = new component(20, 25, "airship(3).png", 240, 480, "image");
-  //spaceship.style.border-style = 'solid';
+  lvl1 = 50;
+  lvl = 1;
+  startSound = new sound("start3.mp3");
+  startSound.play();
+  //document.getElementById("start")=;
+  document.getElementById("score").innerHTML = 0;
+  while (asteroids.length > 0) {
+    asteroids.pop();
+  }
+  explosionSound = new sound("shortex.mp3");
+  pauseSound = new sound("pause2.mp3");
+  document.getElementById("gameOver").innerHTML =`<div style = "position:relative; left:500px; top:50px; class="logo"><img class = "logo" src="meatball(2).png" alt="something" /></div>
+      <div style = "position:relative; right:500px; bottom:50px; class="logo"><img class = "logo" src="meatball(4).png" alt="something" /></div>
+      <div style = "position:absolute; bottom: 470px;"
+      <p>Use WASD to move</p>
+      <p>Avoid the asteroids and sides</p>  
+      <p>How long can you stay alive?</p>`;
+document.getElementById("start").innerHTML = `<button onclick = "restart()"> START </button>`;
+  spaceship = new component(40, 50, "airship(4).png", 230, 480, "image");
+  //spaceship = new component(40, 50, "first_explosion(1).png",240,480, "image");
   spaceship.accel = 0.00;
-  score = new component("30px", "Consolas", "black", 10, 240, "text");
+  score = new component("30px", "Consolas", "yellow", 180, 240, "text");
+  backSound = new sound("mixkit-space-rocket-full-power-turbine-1720.mp3");
+  backSound.stop();
+  backSound.play();
   space.start();
 }
 
 var space = {
   canvas: document.createElement("canvas"),
+
   start: function() {
+    clearInterval(this.interval);
     this.canvas.width = 480;
     this.canvas.height = 480;
     this.context = this.canvas.getContext("2d");
-    document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+    document.getElementById("start").after(this.canvas);
+    background = new component(480, 480, "space.png", 0, 0, "image");
+    //background.src = "space.png";
+
+    // Make sure the image is loaded first otherwise nothing will draw.
+    /*background.onload = function() {
+      ctx.drawImage(background, 0, 0);
+    }*/
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
     this.frameNo = 0;
     this.interval = setInterval(updateSpace, lvl1);
   },
@@ -58,12 +90,11 @@ var space = {
   },
   stop: function() {
     clearInterval(this.interval);
-    //alert("GAME OVER! RESTART?");
-    //restart();x
   },
   speedUp: function() {
     lvl++;
-    this.interval = setInterval(updateSpace, lvl1 * lvl);
+    lvl1 = lvl1 / 2;
+    alert(lvl1);
   }
 }
 
@@ -90,15 +121,13 @@ function component(width, height, color, x, y, type) {
     if (this.type == "text") {
       ctx.font = this.width + " " + this.height;
       ctx.fillStyle = color;
-      ctx.fillText(this.text, this.x, this.y);
+      //  ctx.fillText(this.text, this.x, this.y);
       document.getElementById("score").innerHTML = this.text;
     } else if (type == "image") {
       ctx.drawImage(this.image,
         this.x,
         this.y,
         this.width, this.height);
-      //ctx.fillStyle = "red";
-      //ctx.fillRect(this.x, this.y, this.width, this.height);
     }
     ctx.save();
     ctx.translate(this.x, this.y);
@@ -106,16 +135,6 @@ function component(width, height, color, x, y, type) {
     ctx.restore();
   }
   this.newPos = function() {
-    /*this.accelSpeedx += this.accelx;
-    this.accelSpeedy += this.accely;
-    if (Math.abs(this.accelSpeedx) > 1 && this.accelSpeedx / this.accelx > 0)
-      this.speedX += 0.05 * this.accelSpeedx;
-    else
-      this.speedX += 0.5 * this.accelSpeedx;
-    this.speedY += 0.4 * this.accelSpeedy;
-    if (Math.abs(this.accelSpeedx) > 1 && this.x / this.accelSpeedx > 0)
-      this.x += 0.0025 * this.speedX;
-    else*/
     this.x += this.accelx//0.25 * this.speedX;
     this.y += this.accely//0.8 * this.speedY;
     console.log(this.accelx);
@@ -188,27 +207,21 @@ function componentCircle(radius, color, x, y) {
     ctx = space.context;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = 'blue';
-    ctx.drawImage(this.image, this.x, this.y, 4 * radius, 2 * radius);
-    ctx.stroke();
+    ctx.lineWidth = 0.1;
+    ctx.drawImage(this.image, this.x - 1.25 * radius, this.y - 1.25 * radius, 2.5 * radius, 2.5 * radius);
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.restore();
   }
   this.newPos = function() {
-    /*this.accelSpeedx += .2*this.accelx;
-    this.accelSpeedy += .2*this.accely;
-    if(Math.abs(this.accelSpeedx)>1 && this.accelSpeedx/this.accelx>0)
-      this.speedX += 0.04 * this.accelSpeedx;
-    else
-      this.speedX += 2 * this.accelSpeedx;
-    this.speedY += 0.4 * this.accelSpeedy;
-    if(Math.abs(this.accelSpeedx)>1 && this.x/this.accelSpeedx>0)
-      this.x += 0.08 * this.speedX;
-    else*/
     this.x += accelx//16 * this.speedX;
     this.y += accely//0.8 * this.speedY;
+    this.hitBottom = function() {
+      if (this.y < -50) {
+        this.pop();
+
+      }
+    }
     console.log(this.accelx);
     console.log(this.accelSpeedx);
     console.log(this.speedX);
@@ -218,24 +231,27 @@ function componentCircle(radius, color, x, y) {
 
 
 function updateSpace() {
+  backSound.play();
   var y, width, gap, minWidth, maxWidth, minGap, maxGap;
-  for (i = 0; i < astroids.length; i += 1) {
-    if (spaceship.crashWith(astroids[i])) {
+  for (i = 0; i < asteroids.length; i += 1) {
+    if (spaceship.crashWith(asteroids[i])) {
       stop();
       return;
     }
   }
   space.clear();
+  background.update();
   space.frameNo += 1;
+  console.log(space.frameNo);
   var start = true;
-  if (space.frameNo == 1 || everyinterval(100)) {
+  if (space.frameNo == 1 || everyinterval(lvl1)) {
     y = space.canvas.height;
     if (start) {
       y = space.canvas.height / 10;
       start = false;
     }
-    minWidth = 9;
-    maxWidth = 150;
+    minWidth = 20;
+    maxWidth = 100;
     minGap = 20;
     maxGap = 200;
     gap = Math.floor(Math.random() * (maxGap - minGap + 1) + minGap);
@@ -243,28 +259,30 @@ function updateSpace() {
     if (gap < 50) {
       randomInt = Math.random() * 10 + 60
     }
-    var choice = Math.floor(Math.random() * 2);
+    choice = Math.floor(Math.random() * 2);
     if (choice > 0) {
       width = Math.floor(Math.random() * (maxWidth - minWidth + 1) + minWidth);
-      astroids.push(new componentCircle(width / 1.5, "meatball(1).png", Math.floor(Math.random() * 20) + 200 + randomInt, -(y + 20)));
+      asteroids.push(new componentCircle(width / 1.5, ranArt(), Math.floor(Math.random() * 20) + 200 + randomInt, -(y + 20)));
       width = Math.floor(Math.random() * (maxWidth - minWidth + 1) + minWidth);
-      astroids.push(new componentCircle(width / 1.5, "meatball(1).png", 480 - width - randomInt, -y));
+      asteroids.push(new componentCircle(width / 1.5, ranArt(), 480 - width - randomInt, -y));
     }
     else {
       width = Math.floor(Math.random() * (maxWidth - minWidth + 2) + minWidth + 1);
-      astroids.push(new componentCircle(width / 1.4, "meatball(1).png", Math.floor(Math.random() * 10) + 25 + randomInt, -y));
+      asteroids.push(new componentCircle(width / 1.4, ranArt(), Math.floor(Math.random() * 10) + 25 + randomInt, -y));
     }
   }
-  for (i = 0; i < astroids.length; i += 1) {
-    astroids[i].y += 1;
-    astroids[i].update();
+  for (i = 0; i < asteroids.length; i += 1) {
+    asteroids[i].y += space.frameNo / 200 + 1;
+    asteroids[i].update();
   }
   score.text = "SCORE: " + space.frameNo;
   score.update();
   spaceship.newPos();
   spaceship.update();
-  if (space.framNo % 100 == 0) {
-    space.speedup();
+  console.log(space.frameNo);
+  if (space.frameNo > 100*lvl) {
+    space.speedUp();
+    alert(lvl1);
   }
 }
 
@@ -284,25 +302,78 @@ function hyperaccelerate(n) {
   spaceship.accely *= n;
 }
 function stop() {
-  //spaceship.remove();
-  while (astroids.length > 0) {
-    astroids.pop();
-  }
+  backSound.stop();
+  explosionSound.play();
+  e1 = new component(spaceship.width, spaceship.height, "first_explosion(1).png", spaceship.x, spaceship.y, "image");
+  setTimeout(() => { e1.update(); }, 500);
+  e2 = new component(spaceship.width, spaceship.height, "second_explosion.png", spaceship.x, spaceship.y, "image");
+  setTimeout(() => { e2.update(); }, 1000);
+  setTimeout(() => { e1.update(); }, 1500);
+  setTimeout(() => { e2.update(); }, 2000);
+  setTimeout(() => { e1.update(); }, 2500);
+  ee = new component(spaceship.width, spaceship.height, "third_explosion(1).png", spaceship.x, spaceship.y, "image");
+  //ee.update();
+  setTimeout(() => { ee.update(); }, 3000)
   space.stop();
+  while (asteroids.length > 0) {
+    asteroids.pop();
+  }
   document.getElementById("gameOver").innerHTML = "GAME OVER!";
-  score.text = "SCORE: " + space.frameNo;
-  score.update();
+  //score.text = "SCORE: " + space.frameNo;
+  //score.update();
   return;
 }
+var paused = false;
+function pause() {
+  if (!paused) {
+    backSound.stop();
+    pauseSound.play();
+    clearInterval(space.interval);
+    paused = true;
+  }
+  else {
+    backSound.play();
+    pauseSound.play();
+    space.interval = setInterval(updateSpace, lvl1);
+    paused = false;
+  }
+}
+function ranArt() {
+  artChoice = Math.floor(Math.random() * 4);
+  if (artChoice < 2) {
+    art = "meatball(2).png"
+  } else {
+    art = "meatball(4).png"
+  }
+  return art;
+}
+
+function sound(src) {
+  this.sound = document.createElement("audio");
+  this.sound.src = src;
+  this.sound.setAttribute("preload", "auto");
+  this.sound.setAttribute("controls", "none");
+  this.sound.style.display = "none";
+  document.body.appendChild(this.sound);
+  this.play = function() {
+    this.sound.play();
+  }
+  this.stop = function() {
+    this.sound.pause();
+  }
+}
 function restart() {
-  while (astroids.length > 0) {
-    astroids.pop();
+  /*document.getElementById("gameOver").innerHTML = `<p>Use WASD to move</p>
+      <p>Avoid the asteroids</p>
+      <p>How long can you stay alive?</p>`;
+  space.stop();
+  while (asteroids.length > 0) {
+    asteroids.pop();
   }
   space.clear();
-  clearInterval(space.interval);
-  document.getElementById("gameOver").innerHTML = `<button onmousedown="hyperaccelerate(-0.000000001)" id="accelerateButton">BRAKE</button>
-    <p>Use the ACCELERATE button to speed up</p>
-    <p>Use the BRAKE button to slow down</p>
-    <p>How long can you stay alive?</p>`
+  clearInterval(space.interval);*/
+  paused = false;
+  backSound.stop();
   startGame();
 }
+

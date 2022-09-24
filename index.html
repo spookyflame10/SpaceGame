@@ -14,23 +14,42 @@
 </head>
 
 <body>
-  <button onclick = "startGame()"> START </button>
-  <script src="script.js"></script>
-  <br>
-  <div id="score"></div>
-  <div id="gameOver">
-
-    <button onmousedown="hyperaccelerate(-0.000000001)" id="accelerateButton">BRAKE</button>
-    <p>Use the ACCELERATE button to speed up</p>
-    <p>Use the BRAKE button to slow down</p>
-    <p>How long can you stay alive?</p>
+  <div class="header">
+    <div class="top">
+      <div style = "position:absolute; left:10px; top:6px;">
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Other</a></li>
+          <li><a href="#">More</a></li>
+        </ul>
+      </div>
+      </div>
+    <div style = "position:absolute; left:1800px; top:20px; class="logo"><img class = "logo" src="airship(4).png" alt="something" /></div>
+        <div class="title">Asteroid Belt</div>
   </div>
-  <button onmousedown="restart()">RESTART</button>
+  <div class = "bottom">
+    <div id="gameOver">
+      <div style = "position:relative; left:500px; top:50px; class="logo"><img class = "logo" src="meatball(2).png" alt="something" /></div>
+      <div style = "position:relative; right:500px; bottom:50px; class="logo"><img class = "logo" src="meatball(4).png" alt="something" /></div>
+      <div style = "position:absolute; bottom: 490px;">
+      <p>Use WASD to move</p>
+      <p>Avoid the asteroids and sides</p>  
+      <p>How long can you stay alive?</p>
+    </div>
+  </div>
+    <div id="score"></div>
+    <div id="start"><button onclick = "startGame()"> START </button></div>
+      <br>
+    <button onmousedown="pause()" id="pause">Pause</button>
+    <script src="script.js"></script>
+    <br>
+      
+  </div>
   <!--
   -
   This script places a badge on your repl's full-browser view back to your repl's cover
   page. Try various colors for the theme: dark, light, red, orange, yellow, lime, green,
-  teal, blue, blurple, magenta, pink!
+  teal, blue, purple, magenta, and pink!
   -->
   <script src="https://replit.com/public/js/replit-badge.js" theme="blue" defer></script>
 </body>
