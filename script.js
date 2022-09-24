@@ -154,27 +154,20 @@ function component(width, height, color, x, y, type) {
     var otherbottom = otherobj.y + (otherobj.height);
     var crash = true;
     if (otherobj.type == "circle"){
-      testX = otherleft;
-      testY = othertop;
-      if (otherleft < x){
-        testX = x;
-      }        
-      else if (otherleft > myright) {
-        testX = myright;   // right edge
+      var distX = Math.abs(otherobj.x - this.x-this.width/2);
+      var distY = Math.abs(otherobj.y - this.y-this.height/2);
+      if (distX > (this.width/2 + otherobj.r)) {
+        return false; 
       }
-      if (othertop < mytop){
-        testY = mytop;
-      }         
-      else if (othertop > mybottom) {
-        testY = mybottom;   // bottom edge
+      if (distY > (this.height/2 + otherobj.r)) {
+        return false; 
       }
-      distX = otherleft-testX;
-      distY = othertop-testY;
-      distance = sqrt( (distX*distX) + (distY*distY) );
-  // if the distance is less than the radius, collision!
-      if (distance <= otherobj.radius) {
-        crash = true;
-      }
+      if (distX <= (this.width/2)) {
+        return true; 
+      } 
+      var dx=distX-this.width/2;
+      var dy=distY-this.height/2;
+      return (dx*dx+dy*dy<=(otherobj.radius*otherobj.radius));
     } else if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
       crash = false;
     }
@@ -197,6 +190,7 @@ function componentCircle(radius, color, x, y) {
   this.accelSpeedy = 0;
   this.angle = 0;
   this.update = function() {
+    ctx = space.context;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
     ctx.lineWidth = 3;
@@ -204,7 +198,6 @@ function componentCircle(radius, color, x, y) {
     ctx.stroke();
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle);
     ctx.restore();
   }
   this.newPos = function() {
@@ -214,70 +207,12 @@ function componentCircle(radius, color, x, y) {
     this.speedY += 0.4 * this.accelSpeedy;
     this.x += 0.8 * this.speedX;
     this.y += 0.8 * this.speedY;
-    this.hitBottom();
     console.log(this.accelx);
     console.log(this.accelSpeedx);
     console.log(this.speedX);
   }
-  this.hitBottom = function() {
-    var rockbottom = space.canvas.height - this.height;
-    if (this.y > rockbottom) {
-      this.y = rockbottom;
-      this.accelSpeedy = 0;
-    }
-    if (this.y < 0) {
-      this.y = 0;
-      this.accelSpeedy = 0;
-    }
-    var right = space.canvas.width - this.width;
-    if (this.x > right) {
-      stop()
-      this.x = right;
-      this.accelSpeedx = -1;
-    }
-    if (this.x < 0) {
-      stop();
-      this.x = 0;
-      this.accelSpeedx = 1;
-    }
-
-  }
-  this.crashWith = function(otherobj) {
-    var myleft = this.x;
-    var myright = this.x + (this.width);
-    var mytop = this.y;
-    var mybottom = this.y + (this.height);
-    
-    var otherleft = otherobj.x;
-    var otherright = otherobj.x + (otherobj.width);
-    var othertop = otherobj.y;
-    var otherbottom = otherobj.y + (otherobj.height);
-    var crash = false;
-      testX = otherleft;
-      testY = othertop;
-      if (otherleft < x){
-        testX = x;
-      }        
-      else if (otherleft > myright) {
-        testX = myright;   // right edge
-      }
-      if (othertop < mytop){
-        testY = mytop;
-      }         
-      else if (othertop > mybottom) {
-        testY = mybottom;   // bottom edge
-      }
-      distX = otherleft-testX;
-      distY = othertop-testY;
-      distance = sqrt( (distX*distX) + (distY*distY) );
-  // if the distance is less than the radius, collision!
-      if (distance <= radius) {
-        crash = true;
-      }
-    }
-    return crash;
-  }
 }
+
 
 function updateSpace() {
   var y, width, gap, minWidth, maxWidth, minGap, maxGap;
@@ -314,7 +249,7 @@ function updateSpace() {
     }
     else {
       width = Math.floor(Math.random() * (maxWidth - minWidth + 2) + minWidth + 1);
-      astroids.push(new componentCirlce(width / 1.4, "fallingMeteor.png", Math.floor(Math.random() * 10) + 25 + randomInt, -y));
+      astroids.push(new componentCircle(width / 1.4, "fallingMeteor.png", Math.floor(Math.random() * 10) + 25 + randomInt, -y));
     }
   }
   for (i = 0; i < astroids.length; i += 1) {
