@@ -48,12 +48,13 @@ function startGame() {
   }
   explosionSound = new sound("shortex.mp3");
   pauseSound = new sound("pause2.mp3");
-  document.getElementById("gameOver").innerHTML =`<div style = "position:relative; left:500px; top:50px; class="logo"><img class = "logo" src="meatball(2).png" alt="something" /></div>
-      <div style = "position:relative; right:500px; bottom:50px; class="logo"><img class = "logo" src="meatball(4).png" alt="something" /></div>
-      <div style = "position:absolute; bottom: 470px;"
+  document.getElementById("gameOver").innerHTML =`<div style = "position:relative; left:300%; top:50px; class="logo"><img class = "logo" src="meatball(2).png" alt="something" /></div>
+      <div style = "position:relative; right:300%; bottom:50px; class="logo"><img class = "logo" src="meatball(4).png" alt="something" /></div>
+      <div style = "position:absolute; bottom: 50%px;">
       <p>Use WASD to move</p>
       <p>Avoid the asteroids and sides</p>  
-      <p>How long can you stay alive?</p>`;
+      <p>How long can you stay alive?</p>
+    </div>`;
 document.getElementById("start").innerHTML = `<button onclick = "restart()"> START </button>`;
   spaceship = new component(40, 50, "airship(4).png", 230, 480, "image");
   //spaceship = new component(40, 50, "first_explosion(1).png",240,480, "image");
@@ -93,8 +94,7 @@ var space = {
   },
   speedUp: function() {
     lvl++;
-    lvl1 = lvl1 / 2;
-    alert(lvl1);
+    lvl1 = lvl1 / 1.1;
   }
 }
 
@@ -244,7 +244,7 @@ function updateSpace() {
   space.frameNo += 1;
   console.log(space.frameNo);
   var start = true;
-  if (space.frameNo == 1 || everyinterval(lvl1)) {
+  if (space.frameNo == 1 || everyinterval(50)) {
     y = space.canvas.height;
     if (start) {
       y = space.canvas.height / 10;
@@ -282,7 +282,6 @@ function updateSpace() {
   console.log(space.frameNo);
   if (space.frameNo > 100*lvl) {
     space.speedUp();
-    alert(lvl1);
   }
 }
 
