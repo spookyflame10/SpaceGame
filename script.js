@@ -48,14 +48,14 @@ function startGame() {
   }
   explosionSound = new sound("shortex.mp3");
   pauseSound = new sound("pause2.mp3");
-  document.getElementById("gameOver").innerHTML =`<div style = "position:relative; left:300%; top:50px; class="logo"><img class = "logo" src="meatball(2).png" alt="something" /></div>
+  document.getElementById("gameOver").innerHTML = `<div style = "position:relative; left:300%; top:50px; class="logo"><img class = "logo" src="meatball(2).png" alt="something" /></div>
       <div style = "position:relative; right:300%; bottom:50px; class="logo"><img class = "logo" src="meatball(4).png" alt="something" /></div>
       <div style = "position:absolute; bottom: 50%px;">
       <p>Use WASD to move</p>
       <p>Avoid the asteroids and sides</p>  
       <p>How long can you stay alive?</p>
     </div>`;
-document.getElementById("start").innerHTML = `<button onclick = "restart()"> START </button>`;
+  document.getElementById("start").innerHTML = `<button onclick = "restart()"> START </button>`;
   spaceship = new component(40, 50, "airship(4).png", 230, 480, "image");
   //spaceship = new component(40, 50, "first_explosion(1).png",240,480, "image");
   spaceship.accel = 0.00;
@@ -137,10 +137,6 @@ function component(width, height, color, x, y, type) {
   this.newPos = function() {
     this.x += this.accelx//0.25 * this.speedX;
     this.y += this.accely//0.8 * this.speedY;
-    console.log(this.accelx);
-    console.log(this.accelSpeedx);
-    console.log(this.speedX);
-    console.log(this.x);
     this.hitBottom();
   }
   this.hitBottom = function() {
@@ -222,10 +218,6 @@ function componentCircle(radius, color, x, y) {
 
       }
     }
-    console.log(this.accelx);
-    console.log(this.accelSpeedx);
-    console.log(this.speedX);
-    console.log(this.x);
   }
 }
 
@@ -242,7 +234,6 @@ function updateSpace() {
   space.clear();
   background.update();
   space.frameNo += 1;
-  console.log(space.frameNo);
   var start = true;
   if (space.frameNo == 1 || everyinterval(50)) {
     y = space.canvas.height;
@@ -279,8 +270,7 @@ function updateSpace() {
   score.update();
   spaceship.newPos();
   spaceship.update();
-  console.log(space.frameNo);
-  if (space.frameNo > 100*lvl) {
+  if (space.frameNo > 100 * lvl) {
     space.speedUp();
   }
 }
